@@ -4,37 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autocomplete Search</title>
-    <style>
-      body {
-        font-family: sans-serif;
-      }
-      .autocomplete-container {
-        max-width: 400px;
-        margin: 50px auto;
-      }
-      #suggestions-list {
-        list-style-type: none;
-        padding: 0;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-top: none;
-      }
-      #suggestions-list li {
-        padding: 8px 12px;
-        cursor: pointer;
-      }
-      #suggestions-list li:hover {
-        background-color: #f0f0f0;
-      }
-    </style>
   </head>
   <body>
-    <div class="autocomplete-container">
-      <h2>Autocomplete Search</h2>
-      <input type="text" id="search-input" placeholder="Start typing..." />
-      <ul id="suggestions-list"></ul>
-    </div>
-
-    <script type="module" src="./src/main.js"></script>
+    <h1>Autocomplete Search</h1>
+    <input type="text" id="input" />
+    <ol id="list"></ol>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>

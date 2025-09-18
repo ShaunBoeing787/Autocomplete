@@ -1,6 +1,9 @@
-// src/trie.js
-import TrieNode from "./trieNode.js";
-
+class TrieNode {
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+  }
+}
 class Trie {
   constructor() {
     this.root = new TrieNode();
@@ -36,17 +39,17 @@ class Trie {
       return suggestions;
     }
 
-    this._collectAllWords(node, prefix, suggestions);
+    this.collectAllWords(node, prefix, suggestions);
     return suggestions;
   }
 
-  _collectAllWords(node, currentWord, suggestions) {
+  collectAllWords(node, currentWord, suggestions) {
     if (node.isEndOfWord) {
       suggestions.push(currentWord);
     }
 
     for (const [char, childNode] of node.children.entries()) {
-      this._collectAllWords(childNode, currentWord + char, suggestions);
+      this.collectAllWords(childNode, currentWord + char, suggestions);
     }
   }
 }
