@@ -4,11 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autocomplete Search</title>
+    <style>
+      body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; padding: 20px; }
+      #container { display: flex; gap: 20px; align-items: flex-start; }
+      #suggestions { width: 320px; }
+      #list { padding-left: 1.2em; }
+      #list li { cursor: pointer; padding: 6px 8px; border-radius: 4px; }
+      #list li:hover { background: #f0f0f0; }
+      #meaning { max-width: 540px; white-space: pre-wrap; }
+      .partOfSpeech { font-weight: bold; margin-top: 6px; }
+      .definition { margin: 6px 0; }
+      .example { color: #555; font-style: italic; }
+      .loading { color: #007acc; }
+      .error { color: #c00; }
+    </style>
   </head>
   <body>
     <h1>Autocomplete Search</h1>
     <input type="text" id="input" />
-    <ol id="list"></ol>
+    <div id="container">
+      <div id="suggestions">
+        <h2>Suggestions</h2>
+        <ol id="list"></ol>
+      </div>
+      <div id="meaning">
+        <h2>Meaning</h2>
+        <div id="meaningContent">Select a word to see its definition.</div>
+      </div>
+    </div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>
