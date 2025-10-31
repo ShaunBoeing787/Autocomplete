@@ -6,6 +6,9 @@ This project demonstrates how to efficiently generate smart, ranked suggestions 
 
 ---
 
+<img width="1858" height="897" alt="image" src="https://github.com/user-attachments/assets/9fb8b1d7-1194-404f-ab81-1abcf8b2a548" />
+
+---
 ## 📁 Folder Structure
 
 ```
