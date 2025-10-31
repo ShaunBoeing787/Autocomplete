@@ -5,23 +5,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autocomplete Search</title>
     <style>
-      body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; padding: 20px; }
-      #container { display: flex; gap: 20px; align-items: flex-start; }
-      #suggestions { width: 320px; }
-      #list { padding-left: 1.2em; }
-      #list li { cursor: pointer; padding: 6px 8px; border-radius: 4px; }
-      #list li:hover { background: #f0f0f0; }
-      #meaning { max-width: 540px; white-space: pre-wrap; }
-      .partOfSpeech { font-weight: bold; margin-top: 6px; }
-      .definition { margin: 6px 0; }
-      .example { color: #555; font-style: italic; }
-      .loading { color: #007acc; }
-      .error { color: #c00; }
+      /* --- 1. CSS Variables (The Core of Dark Mode) --- */
+      :root {
+        --bg-color: #f4f7f6;
+        --card-bg: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #555;
+        --text-heading: #2c3e50;
+        --border-color-light: #ecf0f1;
+        --border-color-dark: #ddd;
+        --primary-color: #007acc;
+        --primary-color-light: rgba(0, 122, 204, 0.2);
+        --list-hover-bg: #f0f4f8;
+        --list-active-bg: #007acc;
+        --list-active-text: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.08);
+      }
+
+      body.dark-mode {
+        --bg-color: #2c3e50;
+        --card-bg: #34495e;
+        --text-primary: #ecf0f1;
+        --text-secondary: #bdc3c7;
+        --text-heading: #ffffff;
+        --border-color-light: #4a6279;
+        --border-color-dark: #566f8a;
+        --primary-color: #3498db;
+        --primary-color-light: rgba(52, 152, 219, 0.2);
+        --list-hover-bg: #4a6279;
+        --list-active-bg: #3498db;
+        --list-active-text: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.2);
+      }
+      /* --- End Variables --- */
+
+      /* --- Global Styles (Using Variables) --- */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      h1 {
+        color: var(--text-heading);
+        font-weight: 700;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        color: var(--text-heading);
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color-light);
+        padding-bottom: 8px;
+      }
+
+      /* --- Dark Mode Toggle Styles --- */
+      .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2rem;
+      }
+      .theme-switch {
+        display: inline-block;
+        height: 26px;
+        position: relative;
+        width: 50px;
+      }
+      .theme-switch input {
+        display: none;
+      }
+      .slider {
+        background-color: #ccc;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        background-color: #fff;
+        bottom: 4px;
+        content: '';
+        height: 18px;
+        left: 4px;
+        position: absolute;
+        transition: 0.4s;
+        width: 18px;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: var(--primary-color);
+      }
+      input:checked + .slider:before {
+        transform: translateX(24px);
+      }
+      .theme-switch-wrapper span {
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      /* --- End Toggle Styles --- */
+
+      /* --- Search Input (Using Variables) --- */
+      #input {
+        width: 100%;
+        max-width: 884px; /* Matches container width + gap */
+        padding: 16px 24px;
+        font-size: 1.1rem;
+        border: 1px solid var(--border-color-dark);
+        background-color: var(--card-bg); /* Use card bg */
+        color: var(--text-primary); /* Use primary text */
+        border-radius: 50px; /* Pill shape */
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        transition: all 0.3s ease;
+        box-sizing: border-box; /* Important for padding */
+      }
+      #input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px var(--primary-color-light); /* Focus ring */
+      }
+      #input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      /* --- Layout Container --- */
+      #container {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 900px;
+        flex-wrap: wrap; /* Allows stacking on small screens */
+      }
+
+      /* --- Shared Card Style (Using Variables) --- */
+      #suggestions,
+      #meaning {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+        padding: 24px;
+        box-sizing: border-box;
+        transition: background-color 0.3s ease;
+      }
+
+      /* --- Suggestions Column (Using Variables) --- */
+      #suggestions {
+        flex: 1; /* Takes 1/3 of the space */
+        min-width: 300px;
+      }
+
+      #list {
+        padding-left: 0;
+        list-style-type: none;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      #list li {
+        cursor: pointer;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        font-size: 1rem;
+        color: var(--text-primary); /* Use primary text */
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      #list li:hover {
+        background-color: var(--list-hover-bg);
+      }
+
+      #list li.active {
+        background-color: var(--list-active-bg);
+        color: var(--list-active-text);
+        font-weight: 500;
+      }
+
+      /* --- Meaning Column (Using Variables) --- */
+      #meaning {
+        flex: 2; /* Takes 2/3 of the space */
+        min-width: 300px;
+      }
+
+      #meaningContent {
+        white-space: pre-wrap;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        min-height: 50px;
+        color: var(--text-primary);
+      }
+
+      #meaningContent:empty::before {
+        content: 'Select a word to see its definition.';
+        color: var(--text-secondary); /* Use secondary text */
+        font-style: italic;
+      }
+
+      /* --- Definition Styles (Using Variables) --- */
+      .partOfSpeech {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: var(--primary-color); /* Use primary color */
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+
+      .definition {
+        margin: 6px 0;
+        color: var(--text-primary);
+      }
+
+      .example {
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-top: 8px;
+        padding-left: 15px;
+        border-left: 3px solid var(--border-color-light);
+      }
+
+      /* --- Utility States (Using Variables) --- */
+      .loading {
+        color: var(--primary-color);
+        font-weight: 500;
+        font-style: italic;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .error {
+        color: #c0392b; /* Error red - often kept standard */
+        font-weight: 500;
+        background: #fbeae8;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e74c3c;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+      }
     </style>
   </head>
   <body>
     <h1>Autocomplete Search</h1>
-    <input type="text" id="input" />
+
+    <div class="theme-switch-wrapper">
+      <span>☀️</span>
+      <label class="theme-switch" for="darkModeToggle">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider"></span>
+      </label>
+      <span>🌙</span>
+    </div>
+    <input type="text" id="input" placeholder="Search for a word..." />
+
     <div id="container">
       <div id="suggestions">
         <h2>Suggestions</h2>
@@ -29,9 +287,43 @@
       </div>
       <div id="meaning">
         <h2>Meaning</h2>
-        <div id="meaningContent">Select a word to see its definition.</div>
+        <div id="meaningContent"></div>
       </div>
     </div>
+
     <script type="module" src="./main.js"></script>
-  </body>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Function to apply the theme
+        const applyTheme = (theme) => {
+          if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            toggle.checked = true;
+          } else {
+            body.classList.remove('dark-mode');
+            toggle.checked = false;
+          }
+        };
+
+        // Check for saved theme in localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        // Add event listener for the toggle
+        toggle.addEventListener('change', () => {
+          if (toggle.checked) {
+            applyTheme('dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            applyTheme('light');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      });
+    </script>
+    </body>
 </html>
